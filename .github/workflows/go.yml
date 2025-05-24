@@ -2,23 +2,22 @@ name: Go CI
 
 on:
   push:
-    branches: [ '**' ] # Changed from [ main ]
+    branches: [ '**' ]
   pull_request:
     branches: [ main ]
 
 jobs:
-  build: # Consider renaming this job to 'test-and-build' or similar if preferred
+  build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10 # Added
     steps:
     - uses: actions/checkout@v4
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.22' # Or the version used by the project, 1.21 was mentioned in Dockerfile
-                           # Let's keep 1.22 as it's newer and specified here already.
+        go-version: '1.22'
     - name: Test
-      run: go test ./...  # New test step
+      run: go test ./...
     - name: Build
-      run: go build -v -o ./server ./cmd/server/main.go # Corrected build command
-    - name: Run # This step might be optional for CI if no further integration tests use the running server
-      run: ./server # Corrected run command
+      run: go build -v -o ./server ./cmd/server/main.go
+    # The 'Run' step that was here is now removed.
