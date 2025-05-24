@@ -66,18 +66,13 @@ This service implements value investment principles to automate portfolio manage
     ```
     (The project module is `github.com/jizumer/expedition-value`.)
 
-2.  **Navigate to the server directory:**
+2.  **Run the application (from the project root directory `expedition-value`):**
     ```bash
-    cd cmd/server
-    ```
-
-3.  **Run the application:**
-    ```bash
-    go run main.go
+    go run ./cmd/server/main.go
     ```
     This will start the HTTP server, typically on port `8080`.
 
-4.  **Access the API:**
+3.  **Access the API:**
     *   Health check: `curl http://localhost:8080/health`
     *   Get company (example, requires data to be created first via API): `curl http://localhost:8080/company?ticker=AAPL`
     *   Create company (example JSON body):
