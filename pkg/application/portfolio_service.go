@@ -5,9 +5,9 @@ import (
 	"fmt"    // For error formatting
 	"time"   // For setting UpdatedAt if decided here
 
-	// Assuming this module path, replace with your actual module path
-	"github.com/user/project/pkg/domain/company"
-	"github.com/user/project/pkg/domain/portfolio"
+	// Project packages
+	"github.com/jizumer/expedition-value/pkg/domain/company"
+	"github.com/jizumer/expedition-value/pkg/domain/portfolio"
 
 	"github.com/google/uuid" // For generating portfolio IDs
 )

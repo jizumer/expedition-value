@@ -19,7 +19,7 @@ type Company struct {
 func NewCompany(ticker string, metrics FinancialMetrics, sector Sector) (*Company, error) {
 	// Basic validation, more can be added.
 	if ticker == "" {
-		return nil, errors.New("ticker cannot be empty")
+		return nil, Errors.New("ticker cannot be empty")
 	}
 	return &Company{
 		Ticker:           ticker,

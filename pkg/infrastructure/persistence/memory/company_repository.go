@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/user/project/pkg/domain/company" // Module path placeholder
+	"github.com/jizumer/expedition-value/pkg/domain/company"
 )
 
 // ErrCompanyNotFound is returned when a company is not found in the repository.

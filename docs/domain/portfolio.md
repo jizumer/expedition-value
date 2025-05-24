@@ -2,6 +2,7 @@
 * Description: Manages investment positions and automated rebalancing based on value scores
 * Context: Portfolio Management
 * Properties:
+  - ID (string)
   - Holdings (map[string]Position)
   - CashBalance (Money)
   - RiskProfile (enum)
@@ -15,5 +16,6 @@
   - RebalanceRecommendationCreated
   - RiskThresholdBreached
 * Ways to access: 
+  - FindByID(id string)
   - FindAll
   - SearchBySector

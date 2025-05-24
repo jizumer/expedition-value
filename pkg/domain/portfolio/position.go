@@ -14,10 +14,10 @@ type Position struct {
 // Basic validation can be added here.
 func NewPosition(ticker string, shares int, purchasePrice Money) (*Position, error) {
 	if ticker == "" {
-		return nil, errors.New("company ticker cannot be empty")
+		return nil, Errors.New("company ticker cannot be empty")
 	}
 	if shares <= 0 {
-		return nil, errors.New("shares must be positive")
+		return nil, Errors.New("shares must be positive")
 	}
 	// Add more validation for purchasePrice if necessary (e.g., positive amount)
 	return &Position{
@@ -29,19 +29,7 @@ func NewPosition(ticker string, shares int, purchasePrice Money) (*Position, err
 
 // errors is a placeholder for a proper error handling package or built-in errors.
 // For now, we'll use a simple error type.
-// This is duplicated from portfolio.go, ideally, this would be in a shared utility package.
-type errors struct{}
-
-func (e *errors) New(text string) error {
-	return &customError{text}
-}
-
-type customError struct {
-	s string
-}
-
-func (e *customError) Error() string {
-	return e.s
-}
-
-var Errors = &errors{}
+// Custom error handling (if any specific to Position logic) should ideally use
+// the 'Errors' instance from the portfolio.go file within this package,
+// or the standard 'errors' package for generic errors.
+// The duplicated custom errors struct has been removed from here.

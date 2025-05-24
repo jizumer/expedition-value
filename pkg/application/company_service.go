@@ -2,9 +2,8 @@ package application
 
 import (
 	"errors" // Using standard errors for now
-	"time"   // For setting UpdatedAt if decided here
 
-	"github.com/user/project/pkg/domain/company" // Assuming this module path
+	"github.com/jizumer/expedition-value/pkg/domain/company"
 )
 
 // CompanyService provides application-level functionalities for managing companies.

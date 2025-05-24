@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/user/project/pkg/domain/company"   // Module path placeholder
-	"github.com/user/project/pkg/domain/portfolio" // Module path placeholder
+	"github.com/jizumer/expedition-value/pkg/domain/company"
+	"github.com/jizumer/expedition-value/pkg/domain/portfolio"
 )
 
 // ErrPortfolioNotFound is returned when a portfolio is not found.

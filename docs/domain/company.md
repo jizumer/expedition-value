@@ -15,6 +15,7 @@
   - Recalculate score on metric update
 * Domain Events:
   - ScoreRecalculated
+  - MetricsUpdatedEvent
 * Ways to access:
   - FindByTicker
   - SearchByScoreRange

@@ -5,9 +5,9 @@ import (
 	"net/http"
 	// "github.com/gorilla/mux" // Example router, not strictly needed for placeholders
 
-	"github.com/user/project/pkg/application" // Module path placeholder
-	"github.com/user/project/pkg/domain/company"   // For request/response types
-	"github.com/user/project/pkg/domain/portfolio" // For request/response types
+	"github.com/jizumer/expedition-value/pkg/application"
+	// "github.com/jizumer/expedition-value/pkg/domain/company" // Will be needed when handlers are implemented
+	"github.com/jizumer/expedition-value/pkg/domain/portfolio" // For request/response types
 )
 
 // CompanyHandler holds dependencies for company-related HTTP handlers, primarily the CompanyService.

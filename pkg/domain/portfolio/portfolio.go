@@ -6,6 +6,9 @@ import (
 	// "github.com/google/uuid" // Example if using UUID for ID
 )
 
+// Standard library errors, aliased if needed, or directly use errors.New()
+// For custom error types, we define them below.
+
 // Portfolio represents an investment portfolio.
 // It is an aggregate root.
 type Portfolio struct {
@@ -21,10 +24,10 @@ type Portfolio struct {
 func NewPortfolio(id string, riskProfile RiskProfile, initialCash Money) (*Portfolio, error) {
 	if id == "" {
 		// id = uuid.NewString() // Generate a new UUID if not provided
-		return nil, errors.New("portfolio ID cannot be empty") // For now, require ID
+		return nil, errors.New("portfolio ID cannot be empty") // Standard lib error
 	}
 	if initialCash.Amount < 0 {
-		return nil, errors.New("initial cash balance cannot be negative")
+		return nil, errors.New("initial cash balance cannot be negative") // Standard lib error
 	}
 
 	return &Portfolio{
@@ -62,7 +65,7 @@ func (p *Portfolio) CheckRebalanceTrigger() bool {
 // AddPosition adds a new position or updates an existing one.
 func (p *Portfolio) AddPosition(position Position, cost Money) error {
 	if !p.ValidateCashBalance() || p.CashBalance.Amount < cost.Amount {
-		return errors.New("insufficient cash balance to add position")
+		return Errors.New("insufficient cash balance to add position") // Custom error
 	}
 	// More logic here: update holdings, subtract cost from cash balance
 	p.CashBalance.Amount -= cost.Amount // Assuming same currency
@@ -92,9 +95,9 @@ func (p *Portfolio) GenerateRebalanceRecommendations() ([]string, error) {
 		// recommendations := calculateRecommendations()
 		// p.LastRebalanceTime = time.Now() // Update after rebalance is *applied*, not just recommended
 		// Publish RebalanceRecommendationCreatedEvent
-		return []string{"Recommendation: Sell X, Buy Y"}, nil
+		return []string{"Recommendation: Sell X, Buy Y"}, nil // Placeholder
 	}
-	return nil, errors.New("rebalance not currently triggered")
+	return nil, Errors.New("rebalance not currently triggered") // Custom error
 }
 
 // UpdateRiskProfile changes the portfolio's risk profile.
@@ -146,3 +149,26 @@ type PortfolioUpdatedEvent struct {
 	PortfolioID string
 	Timestamp   time.Time
 }
+
+// domainError is a custom error type for the portfolio package.
+// It allows creating specific error instances that can be checked if needed.
+type domainError struct{}
+
+// New creates a new custom error message formatted as a standard error.
+func (e *domainError) New(text string) error {
+	return &customPortfolioError{s: text}
+}
+
+// customPortfolioError is the underlying type for errors created by domainError.New.
+type customPortfolioError struct {
+	s string
+}
+
+// Error returns the error message string.
+func (e *customPortfolioError) Error() string {
+	return e.s
+}
+
+// Errors provides access to constructors for custom domain errors within the portfolio package.
+// Example: `return Errors.New("some portfolio specific error")`
+var Errors = &domainError{}

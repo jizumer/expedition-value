@@ -1,6 +1,6 @@
 package portfolio
 
-import "errors"
+import "errors" // Standard Go errors package
 
 // Money represents a monetary value, including currency.
 // This is a value object.
