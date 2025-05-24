@@ -1,0 +1,16 @@
+# GCP Deployment config for expedition-value
+# WIP for now. Will be set up once the build pipeline is ready.
+#
+# Deployment is currently DISABLED. To enable, remove the 'disabled' flag and update as needed.
+#
+# resources:
+# - name: expedition-value
+#   type: compute.v1.instance
+#   properties:
+#     machineType: zones/us-central1-a/machineTypes/e2-micro
+#     disks:
+#     - boot: true
+#       initializeParams:
+#         sourceImage: projects/debian-cloud/global/images/family/debian-12
+#     networkInterfaces:
+#     - network: global/networks/default

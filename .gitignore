@@ -23,3 +23,32 @@ go.work.sum
 
 # env file
 .env
+
+# macOS system files
+.DS_Store
+
+# VSCode settings
+.vscode/
+
+# GoLand/JetBrains IDE files
+.idea/
+
+# Logs
+*.log
+
+# Coverage reports
+coverage.out
+
+# Ignore local build and output folders
+bin/
+output/
+
+# Ignore test cache
+go-test-cache/
+
+# Ignore temporary files
+*.tmp
+*.swp
+
+# Ignore generated files
+*.pb.go
