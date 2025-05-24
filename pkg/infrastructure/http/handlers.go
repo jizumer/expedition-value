@@ -3,10 +3,10 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+
 	// "github.com/gorilla/mux" // Example router, not strictly needed for placeholders
 
 	"github.com/jizumer/expedition-value/pkg/application"
-	"github.com/jizumer/expedition-value/pkg/domain/company"   // Will be needed for annotations
 	"github.com/jizumer/expedition-value/pkg/domain/portfolio" // For request/response types and annotations
 )
 

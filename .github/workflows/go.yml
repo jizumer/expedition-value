@@ -2,24 +2,24 @@ name: Go CI
 
 on:
   push:
-    branches: [ '**' ]
+    branches: ["**"]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10 # Added
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.22'
-    - name: Download dependencies
-      run: go mod download
-    - name: Test
-      run: go test ./...
-    - name: Build
-      run: go build -v -o ./server ./cmd/server/main.go
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - name: Download dependencies
+        run: go mod download
+      - name: Build
+        run: go build -v -o ./server ./cmd/server/main.go
+      - name: Test
+        run: go test ./...
     # The 'Run' step that was here is now removed.
