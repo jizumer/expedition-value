@@ -1,3 +1,20 @@
+// @title           Value Investment Analysis API
+// @version         1.0
+// @description     This is an API for the Value Investment Analysis and Portfolio Management MVP.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /
+
+// @externalDocs.description  OpenAPI
+// @externalDocs.url          https://swagger.io/resources/open-api/
 package main
 
 import (
@@ -9,7 +26,9 @@ import (
 	infHttp "github.com/jizumer/expedition-value/pkg/infrastructure/http"
 	"github.com/jizumer/expedition-value/pkg/infrastructure/persistence/memory"
 
-	// No external router for MVP, using net/http.ServeMux
+	// Swagger imports
+	_ "github.com/jizumer/expedition-value/cmd/server/docs" // Generated Swagger docs
+	httpSwagger "github.com/swaggo/http-swagger"           // http-swagger
 )
 
 func main() {
@@ -71,6 +90,10 @@ func main() {
 	// The handler infHttp.PortfolioHandler.CreatePortfolio needs to be implemented
 	// to check r.Method == http.MethodPost and parse the request body.
 	mux.HandleFunc("/portfolio/create", portfolioHandler.CreatePortfolio)
+
+	// Swagger UI handler
+	mux.HandleFunc("/swagger/*", httpSwagger.WrapHandler)
+	log.Println("Swagger UI available at http://localhost:8080/swagger/index.html")
 
 	log.Println("HTTP routes configured.")
 

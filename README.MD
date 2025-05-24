@@ -73,6 +73,7 @@ This service implements value investment principles to automate portfolio manage
     This will start the HTTP server, typically on port `8080`.
 
 3.  **Access the API:**
+    *   **Swagger UI (API Documentation):** Once the server is running, access the interactive API documentation via your browser at [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html). This UI allows you to view all available API endpoints, their parameters, and test them directly.
     *   Health check: `curl http://localhost:8080/health`
     *   Get company (example, requires data to be created first via API): `curl http://localhost:8080/company?ticker=AAPL`
     *   Create company (example JSON body):
