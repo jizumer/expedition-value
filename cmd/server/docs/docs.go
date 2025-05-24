@@ -23,7 +23,430 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {},
+    "paths": {
+        "/company": {
+            "get": {
+                "description": "Get company details by its stock ticker",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "companies"
+                ],
+                "summary": "Get company by ticker",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Company Ticker",
+                        "name": "ticker",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved company",
+                        "schema": {
+                            "$ref": "#/definitions/company.Company"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing ticker)",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Company not found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/company/create": {
+            "post": {
+                "description": "Adds a new company to the system.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "companies"
+                ],
+                "summary": "Create a new company",
+                "parameters": [
+                    {
+                        "description": "Company data to create",
+                        "name": "company",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.CreateCompanyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created company",
+                        "schema": {
+                            "$ref": "#/definitions/company.Company"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid company data provided",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Get the status of server.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Show the status of server.",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved health status",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/portfolio": {
+            "get": {
+                "description": "Get details of a specific portfolio by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "portfolios"
+                ],
+                "summary": "Get portfolio details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Portfolio ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved portfolio",
+                        "schema": {
+                            "$ref": "#/definitions/portfolio.Portfolio"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing ID)",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Portfolio not found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/portfolio/create": {
+            "post": {
+                "description": "Creates a new investment portfolio.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "portfolios"
+                ],
+                "summary": "Create a new portfolio",
+                "parameters": [
+                    {
+                        "description": "Portfolio data to create",
+                        "name": "portfolio",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.CreatePortfolioRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created portfolio",
+                        "schema": {
+                            "$ref": "#/definitions/portfolio.Portfolio"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid portfolio data provided",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "company.Company": {
+            "type": "object",
+            "properties": {
+                "currentScore": {
+                    "type": "number"
+                },
+                "financialMetrics": {
+                    "description": "Defined in financial_metrics.go",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/company.FinancialMetrics"
+                        }
+                    ]
+                },
+                "sector": {
+                    "description": "Enum defined in sector.go",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/company.Sector"
+                        }
+                    ]
+                },
+                "ticker": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "company.FinancialMetrics": {
+            "type": "object",
+            "properties": {
+                "debtToEquity": {
+                    "description": "Debt-to-Equity Ratio",
+                    "type": "number"
+                },
+                "metricsUpdatedAt": {
+                    "description": "Timestamp of when these metrics were last updated",
+                    "type": "string"
+                },
+                "pbratio": {
+                    "description": "Price-to-Book Ratio",
+                    "type": "number"
+                },
+                "peratio": {
+                    "description": "Price-to-Earnings Ratio",
+                    "type": "number"
+                }
+            }
+        },
+        "company.Sector": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+            ],
+            "x-enum-comments": {
+                "UndefinedSector": "Default or unknown sector"
+            },
+            "x-enum-varnames": [
+                "UndefinedSector",
+                "Technology",
+                "Healthcare",
+                "Financials",
+                "ConsumerDiscretionary",
+                "ConsumerStaples",
+                "Industrials",
+                "Energy",
+                "Utilities",
+                "RealEstate",
+                "Materials",
+                "TelecommunicationServices"
+            ]
+        },
+        "http.CreateCompanyRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Apple Inc."
+                },
+                "ticker": {
+                    "type": "string",
+                    "example": "AAPL"
+                }
+            }
+        },
+        "http.CreatePortfolioRequest": {
+            "type": "object"
+        },
+        "http.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Detailed error message"
+                }
+            }
+        },
+        "portfolio.Money": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "Amount in the smallest currency unit (e.g., cents for USD)",
+                    "type": "integer"
+                },
+                "currency": {
+                    "description": "Currency code (e.g., \"USD\", \"EUR\")",
+                    "type": "string"
+                }
+            }
+        },
+        "portfolio.Portfolio": {
+            "type": "object",
+            "properties": {
+                "cashBalance": {
+                    "description": "Current cash balance",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/portfolio.Money"
+                        }
+                    ]
+                },
+                "holdings": {
+                    "description": "Keyed by company ticker",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/portfolio.Position"
+                    }
+                },
+                "id": {
+                    "description": "Unique identifier for the portfolio",
+                    "type": "string"
+                },
+                "lastRebalanceTime": {
+                    "description": "Timestamp of the last rebalance",
+                    "type": "string"
+                },
+                "riskProfile": {
+                    "description": "Investor's risk tolerance",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/portfolio.RiskProfile"
+                        }
+                    ]
+                },
+                "updatedAt": {
+                    "description": "Timestamp of the last update to the portfolio",
+                    "type": "string"
+                }
+            }
+        },
+        "portfolio.Position": {
+            "type": "object",
+            "properties": {
+                "companyTicker": {
+                    "description": "Stock ticker of the company",
+                    "type": "string"
+                },
+                "purchasePrice": {
+                    "description": "Average purchase price per share for this position",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/portfolio.Money"
+                        }
+                    ]
+                },
+                "shares": {
+                    "description": "Number of shares held",
+                    "type": "integer"
+                }
+            }
+        },
+        "portfolio.RiskProfile": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-comments": {
+                "UndefinedProfile": "Default or unknown profile"
+            },
+            "x-enum-varnames": [
+                "UndefinedProfile",
+                "Conservative",
+                "Moderate",
+                "Aggressive"
+            ]
+        }
+    },
     "externalDocs": {
         "description": "OpenAPI",
         "url": "https://swagger.io/resources/open-api/"

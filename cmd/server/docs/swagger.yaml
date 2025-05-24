@@ -1,4 +1,145 @@
 basePath: /
+definitions:
+  company.Company:
+    properties:
+      currentScore:
+        type: number
+      financialMetrics:
+        allOf:
+        - $ref: '#/definitions/company.FinancialMetrics'
+        description: Defined in financial_metrics.go
+      sector:
+        allOf:
+        - $ref: '#/definitions/company.Sector'
+        description: Enum defined in sector.go
+      ticker:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  company.FinancialMetrics:
+    properties:
+      debtToEquity:
+        description: Debt-to-Equity Ratio
+        type: number
+      metricsUpdatedAt:
+        description: Timestamp of when these metrics were last updated
+        type: string
+      pbratio:
+        description: Price-to-Book Ratio
+        type: number
+      peratio:
+        description: Price-to-Earnings Ratio
+        type: number
+    type: object
+  company.Sector:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    type: integer
+    x-enum-comments:
+      UndefinedSector: Default or unknown sector
+    x-enum-varnames:
+    - UndefinedSector
+    - Technology
+    - Healthcare
+    - Financials
+    - ConsumerDiscretionary
+    - ConsumerStaples
+    - Industrials
+    - Energy
+    - Utilities
+    - RealEstate
+    - Materials
+    - TelecommunicationServices
+  http.CreateCompanyRequest:
+    properties:
+      name:
+        example: Apple Inc.
+        type: string
+      ticker:
+        example: AAPL
+        type: string
+    type: object
+  http.CreatePortfolioRequest:
+    type: object
+  http.ErrorResponse:
+    properties:
+      error:
+        example: Detailed error message
+        type: string
+    type: object
+  portfolio.Money:
+    properties:
+      amount:
+        description: Amount in the smallest currency unit (e.g., cents for USD)
+        type: integer
+      currency:
+        description: Currency code (e.g., "USD", "EUR")
+        type: string
+    type: object
+  portfolio.Portfolio:
+    properties:
+      cashBalance:
+        allOf:
+        - $ref: '#/definitions/portfolio.Money'
+        description: Current cash balance
+      holdings:
+        additionalProperties:
+          $ref: '#/definitions/portfolio.Position'
+        description: Keyed by company ticker
+        type: object
+      id:
+        description: Unique identifier for the portfolio
+        type: string
+      lastRebalanceTime:
+        description: Timestamp of the last rebalance
+        type: string
+      riskProfile:
+        allOf:
+        - $ref: '#/definitions/portfolio.RiskProfile'
+        description: Investor's risk tolerance
+      updatedAt:
+        description: Timestamp of the last update to the portfolio
+        type: string
+    type: object
+  portfolio.Position:
+    properties:
+      companyTicker:
+        description: Stock ticker of the company
+        type: string
+      purchasePrice:
+        allOf:
+        - $ref: '#/definitions/portfolio.Money'
+        description: Average purchase price per share for this position
+      shares:
+        description: Number of shares held
+        type: integer
+    type: object
+  portfolio.RiskProfile:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-comments:
+      UndefinedProfile: Default or unknown profile
+    x-enum-varnames:
+    - UndefinedProfile
+    - Conservative
+    - Moderate
+    - Aggressive
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -16,5 +157,148 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Value Investment Analysis API
   version: "1.0"
-paths: {}
+paths:
+  /company:
+    get:
+      consumes:
+      - application/json
+      description: Get company details by its stock ticker
+      parameters:
+      - description: Company Ticker
+        in: query
+        name: ticker
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved company
+          schema:
+            $ref: '#/definitions/company.Company'
+        "400":
+          description: Invalid request (e.g., missing ticker)
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Company not found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get company by ticker
+      tags:
+      - companies
+  /company/create:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new company to the system.
+      parameters:
+      - description: Company data to create
+        in: body
+        name: company
+        required: true
+        schema:
+          $ref: '#/definitions/http.CreateCompanyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created company
+          schema:
+            $ref: '#/definitions/company.Company'
+        "400":
+          description: Invalid company data provided
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Create a new company
+      tags:
+      - companies
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Get the status of server.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved health status
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Show the status of server.
+      tags:
+      - health
+  /portfolio:
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific portfolio by its ID.
+      parameters:
+      - description: Portfolio ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved portfolio
+          schema:
+            $ref: '#/definitions/portfolio.Portfolio'
+        "400":
+          description: Invalid request (e.g., missing ID)
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Portfolio not found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get portfolio details
+      tags:
+      - portfolios
+  /portfolio/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new investment portfolio.
+      parameters:
+      - description: Portfolio data to create
+        in: body
+        name: portfolio
+        required: true
+        schema:
+          $ref: '#/definitions/http.CreatePortfolioRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created portfolio
+          schema:
+            $ref: '#/definitions/portfolio.Portfolio'
+        "400":
+          description: Invalid portfolio data provided
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Create a new portfolio
+      tags:
+      - portfolios
 swagger: "2.0"
