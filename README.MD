@@ -1,47 +1,70 @@
-# Value Investment Analysis and Portfolio Management MVP
+# Value Investment Analysis and Portfolio Management
 
-## Goal
+## Overview
+This service implements value investment principles to automate portfolio management through dynamic scoring and decision automation. The system monitors financial indicators from multiple integrated data sources to generate real-time investment recommendations. This MVP focuses on core analysis and management capabilities.
 
-This application aims to provide a Minimum Viable Product (MVP) for tools related to:
-*   **Value Investment Analysis:** Tracking financial metrics of companies and calculating value investment scores.
-*   **Portfolio Management:** Managing investment positions and providing recommendations for automated rebalancing based on value scores.
+## Core Functionality
+- **Automated Scoring Engine**: Continuously evaluates assets using Graham-style valuation formulas combining:
+  - Fundamental analysis (P/E ratio, book value, earnings growth)
+  - Market position indicators
+  - Sector-specific metrics
+- **Portfolio Optimization**: Maintains:
+  - Current invested positions with cost basis tracking
+  - Watchlist of potential investments
+  - Historical performance analytics
+- **Decision Automation**: Generates four recommendation types:
+  1. New position entry signals
+  2. Position size increase alerts
+  3. Partial reduction warnings
+  4. Full liquidation triggers
 
-## Proposed Tech Stack
+## Key Features
+- **Multi-source Data Integration**: Unified pipeline for financial APIs (e.g., Alpha Vantage, Yahoo Finance) and custom data sources.
+- **Configurable Refresh Intervals**: Adjustable evaluation cycles with default hourly intervals.
+- **Cloud-native Architecture Target**: Designed for GCP deployment with Firestore/PostgreSQL persistence. (MVP currently uses in-memory).
+- **Extensible Scoring Model**: Modular algorithm design supporting custom valuation formulas.
 
-*   **Backend Language:** Go
-    *   **Modularity:** Organized into packages reflecting Domain Driven Design layers:
-        *   `pkg/domain`: Core business logic, aggregates, entities, value objects, domain events, and repository interfaces.
-        *   `pkg/application`: Application services that orchestrate domain logic to fulfill use cases.
-        *   `pkg/infrastructure`: Concrete implementations of repository interfaces (e.g., in-memory for MVP, database adapters), external service clients, and UI-facing components (e.g., HTTP handlers, CLI commands).
-    *   **Main Application(s):** Located in `cmd/` directory (e.g., `cmd/server` for an HTTP server, `cmd/cli` for a command-line interface).
-*   **API (if applicable):** RESTful HTTP API or gRPC. (To be decided based on specific MVP features).
-*   **Data Persistence (MVP):** In-memory storage to simplify initial development.
-*   **Deployment:**
-    *   Local: Direct execution of compiled binaries.
-    *   Cloud: Containerized deployment (e.g., using Docker) suitable for platforms like Google Cloud Run, AWS Fargate, or Kubernetes.
+## Tech Stack & Architecture
 
-**Note to Reviewer:** Please confirm if Go is the preferred backend language. If not, specify the desired language and framework, and I will adjust the plan and implementation accordingly.
+*   **Backend Language:** Go (Version 1.22)
+*   **Web Framework:** Fiber (Target)
+*   **Configuration Management:** Viper (Target)
+*   **Database:** PostgreSQL (Target), In-memory (Current MVP)
+*   **Deployment Target:** Google Cloud Platform (GCP)
+*   **Architecture Principles:**
+    *   **Clean Architecture:** Adhering to a three-layer separation (Domain, Application, Infrastructure).
+    *   **Domain-Driven Design (DDD):**
+        *   **Modularity:** Organized into packages reflecting DDD layers (`pkg/domain`, `pkg/application`, `pkg/infrastructure`).
+        *   **Aggregates:** Core components include `Portfolio` (manages positions, rebalancing) and `Company` (handles financial data, score calculations). A `Recommendation Context` is envisioned for decision workflows.
+    *   **Event-Driven Design:** Using Pub/Sub patterns (Target).
+*   **API:** RESTful HTTP API (Implemented via Go standard library for MVP, target Fiber).
 
-## Initial Constraints
+## Initial Constraints (MVP Focus)
 
 *   **MVP Scope:** Focus on core features for company analysis and basic portfolio management as defined in the DDD blueprints (`docs/domain/`).
 *   **DDD Principles:** Development will adhere to Domain Driven Design principles, using the guidance in `docs/guidelines.md` and the aggregate designs in `docs/domain/`.
 *   **Deployability:** The application must be runnable locally and be structured for straightforward cloud deployment.
 *   **Documentation:** Instructions for running the MVP in both environments will be provided. DDD documents will be updated to reflect any design decisions made during development.
 
-## How to Run Locally
+## Non-Functional Requirements (Target)
+- **Fault Tolerance**: Automatic retries for failed API calls.
+- **Audit Logging**: Immutable record of all portfolio changes.
+- **Configuration First**: All parameters exposed via environment variables.
+- **Testability**: Built-in support for golden master testing.
+
+## How to Run Locally (Current MVP)
 
 ### Prerequisites
-*   Go (version 1.18 or higher recommended) installed on your system.
+*   Go (version 1.22 or higher) installed on your system.
 *   A Go workspace set up.
 
 ### Steps
 1.  **Clone the repository (if you haven't already):**
     ```bash
-    git clone <repository_url>
+    git clone <repository_url> # Replace with actual URL
     cd expedition-value 
     ```
-    (Replace `<repository_url>` with the actual URL of the repository. The project module is `github.com/jizumer/expedition-value`.)
+    (The project module is `github.com/jizumer/expedition-value`.)
 
 2.  **Navigate to the server directory:**
     ```bash
@@ -52,10 +75,9 @@ This application aims to provide a Minimum Viable Product (MVP) for tools relate
     ```bash
     go run main.go
     ```
-    This will start the HTTP server, typically on port `8080`. You should see a log message indicating the server has started.
+    This will start the HTTP server, typically on port `8080`.
 
 4.  **Access the API:**
-    You can now access the API endpoints using a tool like `curl` or Postman. For example:
     *   Health check: `curl http://localhost:8080/health`
     *   Get company (example, requires data to be created first via API): `curl http://localhost:8080/company?ticker=AAPL`
     *   Create company (example JSON body):
@@ -64,7 +86,8 @@ This application aims to provide a Minimum Viable Product (MVP) for tools relate
         ``` 
         (Note: The actual JSON structure for creating a company will depend on the `CreateCompanyRequest` DTO defined in the HTTP handlers and the fields required by the `CompanyService.CreateCompany` method. The example above is a generic placeholder.)
 
-## Deployment to Cloud (Conceptual)
+
+## Deployment to Cloud (Conceptual for MVP, Target GCP)
 
 This application is designed to be deployable to cloud platforms that support Go applications or containers. Here's a general approach:
 
@@ -73,7 +96,7 @@ This application is designed to be deployable to cloud platforms that support Go
 
         ```Dockerfile
         # Use an official Go runtime as a parent image
-        FROM golang:1.21-alpine AS builder
+        FROM golang:1.22-alpine AS builder
 
         # Set the Current Working Directory inside the container
         WORKDIR /app
@@ -87,21 +110,18 @@ This application is designed to be deployable to cloud platforms that support Go
         # Copy the source code into the container
         COPY . .
 
-        # Build the Go app
-        # Build for the server, adjust if you have multiple main packages
+        # Build the Go app for the server
         RUN CGO_ENABLED=0 GOOS=linux go build -v -o server ./cmd/server/main.go
 
-        # Start a new stage from scratch for a GOCR-style image (Google Cloud Optimized Runtimes)
-        # Or use a distroless image for a smaller footprint
+        # Start a new stage
         FROM gcr.io/distroless/static-debian11 
-        # FROM alpine:latest #  Alternative if you need a shell in the final image
 
         WORKDIR /
 
         # Copy the Pre-built binary file from the previous stage
         COPY --from=builder /app/server /server
 
-        # Expose port 8080 to the outside world
+        # Expose port 8080
         EXPOSE 8080
 
         # Command to run the executable
@@ -127,3 +147,10 @@ This application is designed to be deployable to cloud platforms that support Go
 *   **Structured Logging:** Implement structured logging for better observability.
 *   **Persistent Storage:** Replace in-memory repositories with actual database backends (e.g., PostgreSQL, MySQL) managed by the cloud provider (e.g., Cloud SQL, AWS RDS).
 *   **CI/CD Pipeline:** Set up a Continuous Integration/Continuous Deployment pipeline to automate builds and deployments.
+
+
+## Credits & Thanks
+
+- Inspired by [CodelyTV DDD Blueprints](https://codely.com/en/blog/how-to-implement-ddd-code-using-ai)
+- Built with [Go](https://golang.org/), and targeting [Fiber](https://gofiber.io/), [Viper](https://github.com/spf13/viper), [PostgreSQL](https://www.postgresql.org/), and [Google Cloud Platform](https://cloud.google.com/)
+- Project structure and DDD approach based on community best practices.
