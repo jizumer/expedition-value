@@ -189,6 +189,25 @@ func TestPortfolioService_GetPortfolioDetails(t *testing.T) {
 		// Expected: "failed to find portfolio ...: db: no rows in result set"
 	})
 
+	t.Run("NotFound_RepoReturnsNilNil", func(t *testing.T) {
+		// Test the service's specific nil check after repository call
+		nonExistentID := uuid.NewString()
+		mockPortfolioRepo.FindByIDFunc = func(id string) (*portfolio.Portfolio, error) {
+			if id == nonExistentID {
+				return nil, nil // Simulate repository returning no error but also no portfolio
+			}
+			return nil, errors.New("unexpected ID in mock")
+		}
+		_, err := service.GetPortfolioDetails(nonExistentID)
+		if err == nil {
+			t.Errorf("GetPortfolioDetails() for non-existent ID (repo nil,nil) expected error, got nil")
+		}
+		expectedErrorMsg := "portfolio " + nonExistentID + " not found"
+		if err != nil && err.Error() != expectedErrorMsg {
+			t.Errorf("GetPortfolioDetails() error = %q, want %q", err.Error(), expectedErrorMsg)
+		}
+	})
+
 	t.Run("EmptyID", func(t *testing.T) {
 		_, err := service.GetPortfolioDetails("")
 		if err == nil {
