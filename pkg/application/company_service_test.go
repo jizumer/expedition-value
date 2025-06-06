@@ -109,19 +109,19 @@ func TestCompanyService_CreateCompany(t *testing.T) {
 	mockRepo := &MockCompanyRepository{}
 	service := application.NewCompanyService(mockRepo)
 
+	validMetrics, _ := company.NewFinancialMetrics(20, 3, 0.6) // Reusable valid metrics
+
 	t.Run("Success", func(t *testing.T) {
 		ticker := "MSFT"
-		metrics, _ := company.NewFinancialMetrics(20, 3, 0.6)
 		sector := company.Technology
+		mockRepo.SaveCalledWith = nil // Reset spy
 
-		// Mock the Save function
-		var savedCompany *company.Company
 		mockRepo.SaveFunc = func(c *company.Company) error {
-			savedCompany = c // Capture the company passed to Save
+			mockRepo.SaveCalledWith = c // Capture the company passed to Save
 			return nil
 		}
 
-		createdCompany, err := service.CreateCompany(ticker, *metrics, sector)
+		createdCompany, err := service.CreateCompany(ticker, *validMetrics, sector)
 
 		if err != nil {
 			t.Fatalf("CreateCompany() error = %v, wantErr nil", err)
@@ -132,41 +132,105 @@ func TestCompanyService_CreateCompany(t *testing.T) {
 		if createdCompany.Ticker != ticker {
 			t.Errorf("CreateCompany() Ticker = %s, want %s", createdCompany.Ticker, ticker)
 		}
-		if createdCompany.FinancialMetrics.PERatio != metrics.PERatio {
-			t.Errorf("CreateCompany() PERatio = %v, want %v", createdCompany.FinancialMetrics.PERatio, metrics.PERatio)
+		if createdCompany.FinancialMetrics.PERatio != validMetrics.PERatio {
+			t.Errorf("CreateCompany() PERatio = %v, want %v", createdCompany.FinancialMetrics.PERatio, validMetrics.PERatio)
+		}
+		if createdCompany.Sector != sector {
+			t.Errorf("CreateCompany() Sector = %v, want %v", createdCompany.Sector, sector)
 		}
 
-		// Check if Save was called with the correct company data
-		if savedCompany == nil {
+		if mockRepo.SaveCalledWith == nil {
 			t.Errorf("SaveFunc was not called")
-		} else if savedCompany.Ticker != ticker {
-			t.Errorf("SaveFunc called with Ticker = %s, want %s", savedCompany.Ticker, ticker)
+		} else {
+			if mockRepo.SaveCalledWith.Ticker != ticker {
+				t.Errorf("SaveFunc called with Ticker = %s, want %s", mockRepo.SaveCalledWith.Ticker, ticker)
+			}
+			if mockRepo.SaveCalledWith.FinancialMetrics.PERatio != validMetrics.PERatio {
+				t.Errorf("SaveFunc called with PERatio = %v, want %v", mockRepo.SaveCalledWith.FinancialMetrics.PERatio, validMetrics.PERatio)
+			}
+			if mockRepo.SaveCalledWith.Sector != sector {
+				t.Errorf("SaveFunc called with Sector = %v, want %v", mockRepo.SaveCalledWith.Sector, sector)
+			}
 		}
-		// Using testify/assert: assert.NotNil(t, mockRepo.SaveCalledWith)
-		// if mockRepo.SaveCalledWith != nil {
-		//    assert.Equal(t, ticker, mockRepo.SaveCalledWith.Ticker)
-		// }
 	})
 
+	t.Run("SuccessWithDefaultInputs", func(t *testing.T) {
+		ticker := "DEFAULT"
+		defaultMetrics := company.FinancialMetrics{} // As used by handler
+		defaultSector := company.UndefinedSector   // As used by handler
+		mockRepo.SaveCalledWith = nil // Reset spy
+
+		mockRepo.SaveFunc = func(c *company.Company) error {
+			mockRepo.SaveCalledWith = c
+			return nil
+		}
+
+		// Assuming company.NewCompany handles UndefinedSector gracefully (e.g., it's a valid defined value in the enum)
+		// And that FinancialMetrics{} is also valid for NewCompany
+		createdCompany, err := service.CreateCompany(ticker, defaultMetrics, defaultSector)
+
+		if err != nil {
+			t.Fatalf("CreateCompany(default inputs) error = %v, wantErr nil", err)
+		}
+		if createdCompany == nil {
+			t.Fatalf("CreateCompany(default inputs) returned nil company, want non-nil")
+		}
+		if createdCompany.Ticker != ticker {
+			t.Errorf("CreateCompany(default inputs) Ticker = %s, want %s", createdCompany.Ticker, ticker)
+		}
+		if createdCompany.Sector != defaultSector {
+			t.Errorf("CreateCompany(default inputs) Sector = %v, want %v", createdCompany.Sector, defaultSector)
+		}
+		// FinancialMetrics will have zero values, CurrentScore will be 0 initially
+		if createdCompany.FinancialMetrics.PERatio != 0 {
+			t.Errorf("CreateCompany(default inputs) PERatio = %v, want 0", createdCompany.FinancialMetrics.PERatio)
+		}
+
+		if mockRepo.SaveCalledWith == nil {
+			t.Errorf("SaveFunc was not called for default inputs")
+		} else if mockRepo.SaveCalledWith.Ticker != ticker {
+			t.Errorf("SaveFunc called with Ticker = %s for default inputs, want %s", mockRepo.SaveCalledWith.Ticker, ticker)
+		}
+	})
+
+
 	t.Run("EmptyTickerDomainError", func(t *testing.T) {
-		metrics, _ := company.NewFinancialMetrics(20, 3, 0.6)
-		_, err := service.CreateCompany("", *metrics, company.Technology)
+		_, err := service.CreateCompany("", *validMetrics, company.Technology)
 		if err == nil {
 			t.Errorf("CreateCompany() with empty ticker expected domain error, got nil")
 		}
-		// Further check: if err.Error() contains "ticker cannot be empty"
+		// Example of more specific error check:
+		// if !strings.Contains(err.Error(), "ticker cannot be empty") {
+		// 	t.Errorf("Expected error about empty ticker, got: %v", err)
+		// }
 	})
 
-	t.Run("RepositorySaveError", func(t *testing.T) {
+	t.Run("RepositorySaveError_AlreadyExists", func(t *testing.T) {
+		expectedErr := errors.New("company already exists") // Simulate specific error
 		mockRepo.SaveFunc = func(c *company.Company) error {
-			return errors.New("failed to save company")
+			return expectedErr
 		}
-		metrics, _ := company.NewFinancialMetrics(20, 3, 0.6)
-		_, err := service.CreateCompany("TSLA", *metrics, company.Technology)
+		_, err := service.CreateCompany("TSLA", *validMetrics, company.Technology)
 		if err == nil {
-			t.Errorf("CreateCompany() expected repository save error, got nil")
+			t.Errorf("CreateCompany() expected repository save error (already exists), got nil")
 		}
-		// Further check: if err.Error() contains "failed to save company"
+		if !errors.Is(err, expectedErr) { // Check if the error is the one we expect
+			t.Errorf("CreateCompany() error = %v, want %v", err, expectedErr)
+		}
+	})
+
+	t.Run("RepositorySaveError_Generic", func(t *testing.T) {
+		expectedErr := errors.New("failed to save company for other reasons")
+		mockRepo.SaveFunc = func(c *company.Company) error {
+			return expectedErr
+		}
+		_, err := service.CreateCompany("NVDA", *validMetrics, company.Technology)
+		if err == nil {
+			t.Errorf("CreateCompany() expected generic repository save error, got nil")
+		}
+		if !errors.Is(err, expectedErr) {
+			t.Errorf("CreateCompany() error = %v, want %v", err, expectedErr)
+		}
 	})
 }
 
