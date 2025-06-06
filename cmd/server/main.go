@@ -28,7 +28,7 @@ import (
 
 	// Swagger imports
 	_ "github.com/jizumer/expedition-value/cmd/server/docs" // Generated Swagger docs
-	httpSwagger "github.com/swaggo/http-swagger"           // http-swagger
+	httpSwagger "github.com/swaggo/http-swagger"            // http-swagger
 )
 
 func main() {
@@ -92,7 +92,7 @@ func main() {
 	mux.HandleFunc("/portfolio/create", portfolioHandler.CreatePortfolio)
 
 	// Swagger UI handler
-	mux.HandleFunc("/swagger/*", httpSwagger.WrapHandler)
+	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 	log.Println("Swagger UI available at http://localhost:8080/swagger/index.html")
 
 	log.Println("HTTP routes configured.")
