@@ -97,30 +97,3 @@ func (r *InMemoryCompanyRepository) Delete(ticker string) error {
 	delete(r.companies, ticker)
 	return nil
 }
-
-// FindAll (Optional method from interface)
-// func (r *InMemoryCompanyRepository) FindAll() ([]*company.Company, error) {
-// 	r.mu.RLock()
-// 	defer r.mu.RUnlock()
-//
-// 	companies := make([]*company.Company, 0, len(r.companies))
-// 	for _, c := range r.companies {
-// 		companies = append(companies, c)
-// 	}
-// 	return companies, nil
-// }
-
-// FindBySector (Optional method from interface)
-// For in-memory, this is straightforward if Sector is directly on Company.
-// func (r *InMemoryCompanyRepository) FindBySector(sector company.Sector) ([]*company.Company, error) {
-// 	r.mu.RLock()
-// 	defer r.mu.RUnlock()
-//
-// 	var results []*company.Company
-// 	for _, c := range r.companies {
-// 		if c.Sector == sector {
-// 			results = append(results, c)
-// 		}
-// 	}
-// 	return results, nil
-// }
